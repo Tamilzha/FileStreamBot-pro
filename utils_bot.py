@@ -4,6 +4,10 @@ import threading
 import time
 from asyncio import TimeoutError
 from pyrogram import filters
+from aiohttp import web
+from plugins import web_server
+
+PORT = "8080"
 
 LOGGER = logging.getLogger(__name__)
 SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
@@ -24,7 +28,10 @@ class setInterval:
 
     def cancel(self):
         self.stopEvent.set()
-
+        app = web.AppRunner(await web_server())
+        await app.setup()
+        bind_address = "0.0.0.0"
+        await web.TCPSite(app, bind_address, PORT).start()
 
 def get_readable_file_size(size_in_bytes) -> str:
     if size_in_bytes is None:
